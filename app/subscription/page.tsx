@@ -1,9 +1,11 @@
 "use client";
 
 import { Client, Databases, Query } from 'appwrite';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input} from "@nextui-org/react";
 import {SearchIcon} from '../icons/SearchIcon';
+import debounce from "lodash.debounce";
+
 
 // todo: cleanup null coalescing
 const databaseID = process.env.databaseID ?? "";
@@ -54,6 +56,11 @@ export default function SubscriptionHome() {
     const [searchQuery, setSearchQuery] = useState("");
 
 
+    const debouncedResults = useMemo(() => {
+        return debounce(updateSearchQuery,300);
+    }, []);
+
+
     useEffect(() => {
         const client = new Client();
 
@@ -64,8 +71,21 @@ export default function SubscriptionHome() {
         let database = new Databases(client);
         setDatabase(database);
 
+        return () => {
+            debouncedResults.cancel();
+        }
     }, []);
     
+
+    function updateSearchQuery(event: any) {
+        let newValue = event.target.value;
+        setSearchQuery(newValue);
+        if(newValue == "") {
+            loadFilteredCars([]);
+        } else {
+            loadFilteredCars([Query.search('shortname', newValue)]);
+        }
+    }
 
 
     async function loadVehicles() {
@@ -178,20 +198,13 @@ export default function SubscriptionHome() {
 
             {/* cars */}
             <div className='w-full space-y-5'>
+                <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
                 <Input variant='flat' placeholder='Search for cars' isClearable 
                     startContent={
                         <SearchIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0 fill-gray-300"/>
                     }
-                    value={searchQuery}
-                    onValueChange={(newValue) => {
-                        setSearchQuery(newValue);
-                        if(newValue == "") {
-                            loadFilteredCars([]);
-                        } else {
-                            loadFilteredCars([Query.search('shortname', newValue)]);
-                        }
-                        
-                    }}
+                    // value={searchQuery}
+                    onChange={debouncedResults}
                 />
 
                 <Table aria-label="" selectionMode='multiple' color='primary'>

@@ -5,10 +5,10 @@ export const SearchIcon = (props) => (
         {...props} 
         height="1em"
         width="1em"
-        clip-rule="evenodd" 
-        fill-rule="evenodd" 
-        stroke-linejoin="round" 
-        stroke-miterlimit="2" 
+        clipRule="evenodd" 
+        fillRule="evenodd" 
+        strokeLineJoin="round" 
+        strokeMiterLimit="2" 
         viewBox="0 0 24 24" 
         xmlns="http://www.w3.org/2000/svg"
     >
