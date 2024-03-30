@@ -13,6 +13,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 
 ### Update script
-the update script will update the database data with new values
-`node --env-file=.env update_script.js`
+the update script will download the csv data and update the database with new values
+`node update_script.js`
 
