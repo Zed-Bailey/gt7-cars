@@ -3,26 +3,20 @@
 import { Client, Databases, Query } from 'appwrite';
 import { useEffect, useMemo, useState } from 'react';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input} from "@nextui-org/react";
-import {SearchIcon} from '../icons/SearchIcon';
+import {SearchIcon} from '../../_icons/SearchIcon';
 import debounce from "lodash.debounce";
-
+import Car from '../../_models/Car';
+import Manufacturer from '../../_models/Manufacturer';
+import Country from '../../_models/Country';
 
 // todo: cleanup null coalescing
 const databaseID = process.env.databaseID ?? "";
 const carsCollectionID = process.env.carsCollectionID ?? "";
 const manufacturerCollectionId = process.env.manufacturerCollectionId ?? "";
+const countryCollectionId = process.env.countryCollectionId ?? "";
 
-interface Car {
-    id: number;
-    shortname: string,
-    manufacturer: number;
-}
 
-interface Manufacturer {
-    id : number;
-    name: string;
-    country: number;
-}
+
 
 
 const columns = [
@@ -46,8 +40,8 @@ export default function SubscriptionHome() {
 
 
     const [vehicles, setVehicles] = useState<Car[]>([]);
-
     const [manufacturer, setManufacturers] = useState<Map<number, Manufacturer>>();
+    const [countries, setCountries] = useState<Country[]>([]);
 
     const [manufacturerFilter, setManufacturerFilter] = useState<string[]>([]);
 
@@ -89,6 +83,8 @@ export default function SubscriptionHome() {
 
 
     async function loadVehicles() {
+        
+        // load documents from database
         let carDocs = await database?.listDocuments(
                 databaseID,
                 carsCollectionID,
@@ -101,6 +97,12 @@ export default function SubscriptionHome() {
                 [ Query.orderAsc('name'), Query.limit(100) ]
             ).then(r => r.documents);
 
+        let countryDocs = await database?.listDocuments(
+            databaseID,
+            countryCollectionId,
+            [ Query.orderAsc('name'), Query.limit(25) ]
+        ).then(r => r.documents);
+
         let manufacturerArr: Map<number, Manufacturer> = new Map();
         manufacturerDocs?.forEach((value, index) => {
             manufacturerArr.set(value['id'], {
@@ -109,9 +111,9 @@ export default function SubscriptionHome() {
                 country: value['country']
             });
         });
-
         setManufacturers(manufacturerArr);
 
+        // convert from Document to the interface type and update state
 
         let vehicleArr: Car[] = [];
         carDocs?.forEach((value) => {
@@ -121,8 +123,20 @@ export default function SubscriptionHome() {
                 shortname: value['shortname']
             });
         });
-
         setVehicles(vehicleArr);
+
+
+        let countryArr: Country[] = [];
+        countryDocs?.forEach((value, index) => {
+            countryArr.push({
+                id: value['id'],
+                code: value['code'],
+                name: value['name']
+            });
+        });
+        setCountries(countryArr);
+
+        
     }
 
    
@@ -167,32 +181,40 @@ export default function SubscriptionHome() {
     return (
         <main className="flex p-5">
             {/* Brand filters */}
-            <div>
-                <CheckboxGroup
-                    label="Filter by manufacturer"
-                    className="max-h-screen overflow-y-scroll py-5"
-                    onValueChange={setManufacturerFilter}
-                >
-                    {
-                        manufacturer ? Array.from(manufacturer.values()).map((m) => {
-                            return(
-                                <Checkbox key={m.id} value={m.id.toString()}>{m.name}</Checkbox>
-                            );
-                        }) : null
-                    }
-                </CheckboxGroup>
+            <div className='space-y-5'>
+                <div>
+                    <p className='font-bold'>Filter by manufacturer</p>
+                    <CheckboxGroup
+                        // label="Filter by manufacturer"
+                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
+                        onValueChange={setManufacturerFilter}
+                    >
+                        {
+                            manufacturer ? Array.from(manufacturer.values()).map((m) => {
+                                return(
+                                    <Checkbox key={m.id} value={m.id.toString()}>{m.name}</Checkbox>
+                                );
+                            }) : null
+                        }
+                    </CheckboxGroup>
+                </div>
+                
 
 
-                <CheckboxGroup
-                    label="Filter by country"
-                >
-                    <Checkbox value="buenos-aires">Buenos Aires</Checkbox>
-                    <Checkbox value="buenos-aies">Buenos Aires</Checkbox>
-                    <Checkbox value="buenos-aires">Buenos Aires</Checkbox>
-                    <Checkbox value="buenosaires">Buenos Aires</Checkbox>
-                    <Checkbox value="bueno-aires">Buenos Aires</Checkbox>
-                    <Checkbox value="buenos-ares">Buenos Aires</Checkbox>
-                </CheckboxGroup>
+
+                <div>
+                    <p className='font-bold'>Filter by Country</p>
+                
+                    <CheckboxGroup
+                        className="max-h-96 overflow-y-scroll overflow-x-none py-2"
+                    >
+                        {
+                            countries ? Array.from(countries.values()).map((c) => <Checkbox key={c.id} value={c.id.toString()}>{c.name}</Checkbox>)
+                            : null
+                        }
+                    </CheckboxGroup>
+                </div>
+                
 
             </div>
 

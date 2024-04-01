@@ -2,7 +2,7 @@
 
 import { Button, Input } from "@nextui-org/react";
 import Image from "next/image";
-import {MailIcon} from "./icons/Mailicon";
+import {MailIcon} from "./_icons/Mailicon";
 import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
