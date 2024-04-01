@@ -18,6 +18,8 @@ const database = new sdk.Databases(client);
 const databaseID = process.env.APPWRITE_DATABASE_ID;
 const carsCollectionID = process.env.APPWRITE_CAR_COLLECTION_ID;
 const manufacturerCollectionId = process.env.APPWRITE_MANUFACTURER_COLLECTION_ID;
+const countryCollectionId = process.env.APPWRITE_COUNTRY_COLLECTION_ID
+
 
 /**
  * fetches the csv document and splits on the newline '\n'
@@ -68,6 +70,10 @@ async function seedCars(lines) {
 }
 
 
+/**
+ * 
+ * @param {string[]} lines 
+ */
 async function seedMakers(lines) {
     let makers = [];
     lines.forEach(line => {
@@ -82,8 +88,6 @@ async function seedMakers(lines) {
     
 
     makers.forEach(async car => {
-        
-
         let promise = database.createDocument(
             databaseID,
             manufacturerCollectionId,
@@ -100,17 +104,54 @@ async function seedMakers(lines) {
     })
 }
 
+/**
+ * 
+ * @param {string[]} lines 
+ */
+async function seedCountries(lines) {
+    let countries = [];
+    lines.forEach(line => {
+        let sections = line.split(',');
+        countries.push({
+            id: sections[0],
+            name: sections[1],
+            code: sections[2]
+        });
+    });    
+
+    
+
+    countries.forEach(async car => {
+        let promise = database.createDocument(
+            databaseID,
+            countryCollectionId,
+            sdk.ID.unique(),
+            car
+        );
+
+        await promise.then(function (response) {
+            console.log('inserted country: ' + JSON.stringify(car));
+        }, function (error) {
+            console.log('failed to insert: ' + JSON.stringify(car) + '\n reason: ' + error);
+        });
+        
+    })
+}
+
 (async function fetchData() {
     const carsCsv = "https://raw.githubusercontent.com/ddm999/gt7info/web-new/_data/db/cars.csv";
     const countryCsv = "https://raw.githubusercontent.com/ddm999/gt7info/web-new/_data/db/country.csv";
     const makerCsv = "https://raw.githubusercontent.com/ddm999/gt7info/web-new/_data/db/maker.csv";
 
     
-    let carsDocument = await fetchCsv(carsCsv);
-    await seedCars(carsDocument);
+    // let carsDocument = await fetchCsv(carsCsv);
+    // await seedCars(carsDocument);
 
     // let makersDocument = await fetchCsv(makerCsv);
     // await seedMakers(makersDocument);
+
+    let countryDocument = await fetchCsv(countryCsv);
+    await seedCountries(countryDocument);
 
 
 })();
