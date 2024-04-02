@@ -4,6 +4,7 @@ import { Client, Databases, Query } from 'appwrite';
 import { useEffect, useMemo, useState } from 'react';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input} from "@nextui-org/react";
 import {SearchIcon} from '../../_icons/SearchIcon';
+import "/node_modules/flag-icons/css/flag-icons.min.css";
 import debounce from "lodash.debounce";
 import Car from '../../_models/Car';
 import Manufacturer from '../../_models/Manufacturer';
@@ -31,6 +32,10 @@ const columns = [
     {
         key: 'maker',
         label: 'Manufacturer'
+    }, 
+    {
+        key: 'country',
+        label: 'Country'
     }
 ]
 
@@ -41,9 +46,10 @@ export default function SubscriptionHome() {
 
     const [vehicles, setVehicles] = useState<Car[]>([]);
     const [manufacturer, setManufacturers] = useState<Map<number, Manufacturer>>();
-    const [countries, setCountries] = useState<Country[]>([]);
+    const [countries, setCountries] = useState<Map<number, Country>>();
 
     const [manufacturerFilter, setManufacturerFilter] = useState<string[]>([]);
+    const [countryFilter, setCountryFilter] = useState<string[]>([]);
 
     const [database, setDatabase] = useState<Databases>();
     
@@ -126,9 +132,9 @@ export default function SubscriptionHome() {
         setVehicles(vehicleArr);
 
 
-        let countryArr: Country[] = [];
+        let countryArr: Map<number, Country> = new Map();
         countryDocs?.forEach((value, index) => {
-            countryArr.push({
+            countryArr.set(value['id'], {
                 id: value['id'],
                 code: value['code'],
                 name: value['name']
@@ -173,9 +179,32 @@ export default function SubscriptionHome() {
             return;
         }
 
-        loadFilteredCars([ Query.equal('maker', manufacturerFilter) ]);
+        let n: number[] = [];
+        manufacturerFilter.forEach((x) => n.push(Number(x)));
+        loadFilteredCars([ Query.equal('maker', n) ]);
 
     }, [manufacturerFilter]);
+
+    
+    // useEffect(() => {
+    //     // get all selected countries
+    //     let countryIds: number[] = [];
+    //     countryFilter.forEach((x) => countryIds.push(Number(x)));
+        
+    //     let selectedManufacturers: number[] = []
+    //     if(manufacturer) {
+    //         // get list of all selected manufacturers 
+    //         Array.from(manufacturer?.values())
+    //             .filter((x) => countryIds.includes(x.country))
+    //             .forEach((x) => selectedManufacturers.push(x.id));
+    //     }
+        
+    //     let filtered = vehicles.filter((x) => selectedManufacturers.includes(x.manufacturer));
+    //     setVehicles(filtered)
+        
+    // }, [countryFilter]);
+
+
 
 
     return (
@@ -186,7 +215,7 @@ export default function SubscriptionHome() {
                     <p className='font-bold'>Filter by manufacturer</p>
                     <CheckboxGroup
                         // label="Filter by manufacturer"
-                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
+                        className="max-h-screen overflow-y-scroll overflow-x-hidden py-2 pr-2"
                         onValueChange={setManufacturerFilter}
                     >
                         {
@@ -202,11 +231,12 @@ export default function SubscriptionHome() {
 
 
 
-                <div>
+                {/* <div>
                     <p className='font-bold'>Filter by Country</p>
                 
                     <CheckboxGroup
                         className="max-h-96 overflow-y-scroll overflow-x-none py-2"
+                        onValueChange={setCountryFilter}
                     >
                         {
                             countries ? Array.from(countries.values()).map((c) => <Checkbox key={c.id} value={c.id.toString()}>{c.name}</Checkbox>)
@@ -214,7 +244,7 @@ export default function SubscriptionHome() {
                         }
                     </CheckboxGroup>
                 </div>
-                
+                 */}
 
             </div>
 
@@ -231,25 +261,34 @@ export default function SubscriptionHome() {
 
                 <Table aria-label="" selectionMode='multiple' color='primary'>
                 
-                <TableHeader columns={columns}>
-                    {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
-                </TableHeader>
-                <TableBody emptyContent={"No cars to display"}>
-                    {
-                        vehicles?.map((value) => 
-                            <TableRow key={value.id}>
-                                <TableCell>{value.id}</TableCell>
-                                <TableCell>{value.shortname}</TableCell>
-                                <TableCell>{manufacturer?.get(value.manufacturer)?.name ?? 'null'}</TableCell>
-                                
-                            </TableRow>
-                            
-                        )
-                    }
-                </TableBody>
-            </Table>
+                    <TableHeader columns={columns}>
+                        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                    </TableHeader>
+
+                    <TableBody emptyContent={"No cars to display"} onLoadMore={() => {console.log('LOAD MORE!')}}>
+                        {
+                            vehicles?.map((value) => {
+                                let m = manufacturer?.get(value.manufacturer);
+                                return (
+                                    <TableRow key={value.id}>
+                                        <TableCell>{value.id}</TableCell>
+                                        <TableCell>{value.shortname}</TableCell>
+                                        <TableCell>{m?.name ?? ''}</TableCell>
+                                        <TableCell>
+                                            <span className={`fi fi-${countries?.get(m!.country)?.code}`}></span>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
+                        }
+                    </TableBody>
+                </Table>
             
             </div>
+
+            {
+
+            }
             
         </main>
     );
