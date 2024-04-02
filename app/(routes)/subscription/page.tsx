@@ -49,7 +49,6 @@ export default function SubscriptionHome() {
     const [countries, setCountries] = useState<Map<number, Country>>();
 
     const [manufacturerFilter, setManufacturerFilter] = useState<string[]>([]);
-    const [countryFilter, setCountryFilter] = useState<string[]>([]);
 
     const [database, setDatabase] = useState<Databases>();
     
@@ -186,23 +185,6 @@ export default function SubscriptionHome() {
     }, [manufacturerFilter]);
 
     
-    // useEffect(() => {
-    //     // get all selected countries
-    //     let countryIds: number[] = [];
-    //     countryFilter.forEach((x) => countryIds.push(Number(x)));
-        
-    //     let selectedManufacturers: number[] = []
-    //     if(manufacturer) {
-    //         // get list of all selected manufacturers 
-    //         Array.from(manufacturer?.values())
-    //             .filter((x) => countryIds.includes(x.country))
-    //             .forEach((x) => selectedManufacturers.push(x.id));
-    //     }
-        
-    //     let filtered = vehicles.filter((x) => selectedManufacturers.includes(x.manufacturer));
-    //     setVehicles(filtered)
-        
-    // }, [countryFilter]);
 
 
 
@@ -227,24 +209,7 @@ export default function SubscriptionHome() {
                         }
                     </CheckboxGroup>
                 </div>
-                
-
-
-
-                {/* <div>
-                    <p className='font-bold'>Filter by Country</p>
-                
-                    <CheckboxGroup
-                        className="max-h-96 overflow-y-scroll overflow-x-none py-2"
-                        onValueChange={setCountryFilter}
-                    >
-                        {
-                            countries ? Array.from(countries.values()).map((c) => <Checkbox key={c.id} value={c.id.toString()}>{c.name}</Checkbox>)
-                            : null
-                        }
-                    </CheckboxGroup>
-                </div>
-                 */}
+            
 
             </div>
 
