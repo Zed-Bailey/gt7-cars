@@ -102,7 +102,35 @@ export default function SubscriptionHome() {
 
     function updateSearchQuery(event: any) {
         let newValue = event.target.value;
+        
+        async function filter() {
+            if(!supabase) {
+                setIsLoading(false);
+                return;
+            }
+
+            const {data, error} = await supabase
+                .from('Car')
+                .select()
+                .ilike('name', `%${newValue}%`);
+
+            if(error) throw error;
+
+            let cars: Car[] = [];
+            data.forEach((x) => {
+                let car: Car = x;
+                cars.push(car);
+            });
+            
+            setVehicles(cars);
+            setIsLoading(false);
+        }
+        
         setSearchQuery(newValue);
+        setIsLoading(true);
+        setVehicles([]);
+        
+        filter();
     }
 
 
@@ -115,7 +143,7 @@ export default function SubscriptionHome() {
 
     useEffect(() => {
         async function filter() {
-            if(!supabase || !countries) {
+            if(!supabase || !countries || !manufacturer) {
                 setIsLoading(false);
                 return;
             }
@@ -150,10 +178,6 @@ export default function SubscriptionHome() {
             });
             
             setVehicles(cars);
-            
-            
-
-
             setIsLoading(false);
         }
 
