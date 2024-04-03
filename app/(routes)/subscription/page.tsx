@@ -2,21 +2,17 @@
 
 import { Client, Databases, Query } from 'appwrite';
 import { useEffect, useMemo, useState } from 'react';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input} from "@nextui-org/react";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input, Spinner} from "@nextui-org/react";
 import {SearchIcon} from '../../_icons/SearchIcon';
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import debounce from "lodash.debounce";
 import Car from '../../_models/Car';
 import Manufacturer from '../../_models/Manufacturer';
 import Country from '../../_models/Country';
-
-// todo: cleanup null coalescing
-const databaseID = process.env.databaseID ?? "";
-const carsCollectionID = process.env.carsCollectionID ?? "";
-const manufacturerCollectionId = process.env.manufacturerCollectionId ?? "";
-const countryCollectionId = process.env.countryCollectionId ?? "";
-
-
+import { useAsyncList } from '@react-stately/data';
+import { useInfiniteScroll } from '@nextui-org/use-infinite-scroll';
+import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import DataLoader from '@/app/_helpers/dataloader';
 
 
 
@@ -41,34 +37,62 @@ const columns = [
 
 
 
+
+
 export default function SubscriptionHome() {
 
 
     const [vehicles, setVehicles] = useState<Car[]>([]);
+    const [filteredVehicles, setFilteredVehicles] =  useState<Car[]>([]);
+
+    const [supabase, setSupabaseClient] = useState<SupabaseClient>();
+
     const [manufacturer, setManufacturers] = useState<Map<number, Manufacturer>>();
     const [countries, setCountries] = useState<Map<number, Country>>();
 
     const [manufacturerFilter, setManufacturerFilter] = useState<string[]>([]);
+    const [countryFilter, setCountryFilter] = useState<string[]>([]);
 
-    const [database, setDatabase] = useState<Databases>();
-    
     const [searchQuery, setSearchQuery] = useState("");
 
 
+    const [isLoading, setIsLoading] = useState(false);
+
+    
     const debouncedResults = useMemo(() => {
         return debounce(updateSearchQuery,300);
     }, []);
 
 
-    useEffect(() => {
-        const client = new Client();
+    async function loadData() {
 
-        client
-            .setEndpoint('https://cloud.appwrite.io/v1')
-            .setProject(process.env.projectId ?? "");
-            
-        let database = new Databases(client);
-        setDatabase(database);
+        let loader = new DataLoader(supabase);
+        let cars = await loader.loadcars();
+        let countries = await loader.loadcountries();
+        let makers = await loader.loadmanufacturers();
+
+        setVehicles(cars);
+        setCountries(countries);
+        setManufacturers(makers);
+        
+        setIsLoading(false);
+
+    }
+
+    
+
+
+    useEffect(() => {
+        if(supabase) {
+            setIsLoading(true);
+            loadData();
+        }
+        
+    }, [supabase]);
+
+    useEffect(() => {
+        const supaClient = createClient(process.env.supabaseUrl ?? "", process.env.supabaseKey ?? "");
+        setSupabaseClient(supaClient);
 
         return () => {
             debouncedResults.cancel();
@@ -79,111 +103,67 @@ export default function SubscriptionHome() {
     function updateSearchQuery(event: any) {
         let newValue = event.target.value;
         setSearchQuery(newValue);
-        if(newValue == "") {
-            loadFilteredCars([]);
-        } else {
-            loadFilteredCars([Query.search('shortname', newValue)]);
-        }
     }
 
 
-    async function loadVehicles() {
-        
-        // load documents from database
-        let carDocs = await database?.listDocuments(
-                databaseID,
-                carsCollectionID,
-                []
-            ).then(r => r.documents);
-        
-        let manufacturerDocs = await database?.listDocuments(
-                databaseID,
-                manufacturerCollectionId,
-                [ Query.orderAsc('name'), Query.limit(100) ]
-            ).then(r => r.documents);
-
-        let countryDocs = await database?.listDocuments(
-            databaseID,
-            countryCollectionId,
-            [ Query.orderAsc('name'), Query.limit(25) ]
-        ).then(r => r.documents);
-
-        let manufacturerArr: Map<number, Manufacturer> = new Map();
-        manufacturerDocs?.forEach((value, index) => {
-            manufacturerArr.set(value['id'], {
-                id: value['id'],
-                name: value['name'],
-                country: value['country']
-            });
-        });
-        setManufacturers(manufacturerArr);
-
-        // convert from Document to the interface type and update state
-
-        let vehicleArr: Car[] = [];
-        carDocs?.forEach((value) => {
-            vehicleArr.push({
-                id: value['id'],
-                manufacturer: value['maker'],
-                shortname: value['shortname']
-            });
-        });
-        setVehicles(vehicleArr);
 
 
-        let countryArr: Map<number, Country> = new Map();
-        countryDocs?.forEach((value, index) => {
-            countryArr.set(value['id'], {
-                id: value['id'],
-                code: value['code'],
-                name: value['name']
-            });
-        });
-        setCountries(countryArr);
-
-        
-    }
 
    
-
-    useEffect(() => {
-        loadVehicles();
-    }, [database]);
-
-
-    async function loadFilteredCars(queries: string[]) {
-        setVehicles([]);
-
-        let carDocs = await database?.listDocuments(
-            databaseID,
-            carsCollectionID,
-            queries
-        ).then(r => r.documents);
     
 
-        let vehicleArr: Car[] = [];
-        carDocs?.forEach((value) => {
-            vehicleArr.push({
-                id: value['id'],
-                manufacturer: value['maker'],
-                shortname: value['shortname']
-            });
-        });
-
-        setVehicles(vehicleArr);
-    }
 
     useEffect(() => {
-        if(manufacturerFilter.length == 0) {
-            return;
+        async function filter() {
+            if(!supabase || !countries) {
+                setIsLoading(false);
+                return;
+            }
+            
+
+            
+            let manuFilterConverted = manufacturerFilter.map(Number);
+            if(manuFilterConverted.length == 0) {
+                manuFilterConverted = Array.from(manufacturer!.values()).map((x) => x.id);
+            }
+
+
+            let conFilterConverted: number[] = countryFilter.map(Number);
+            if(conFilterConverted.length == 0) {
+                conFilterConverted = Array.from(countries!.values()).map((x) => x.id);
+            }
+
+
+
+            const { data, error } = await supabase
+                .from('Car')
+                .select()
+                .in('manufacturer', manuFilterConverted)
+                .in('country', conFilterConverted);
+
+            if(error) throw error;
+
+            let cars: Car[] = [];
+            data.forEach((x) => {
+                let car: Car = x;
+                cars.push(car);
+            });
+            
+            setVehicles(cars);
+            
+            
+
+
+            setIsLoading(false);
         }
 
-        let n: number[] = [];
-        manufacturerFilter.forEach((x) => n.push(Number(x)));
-        loadFilteredCars([ Query.equal('maker', n) ]);
+        setVehicles([]);
+        setIsLoading(true);
+        
+        filter();
 
-    }, [manufacturerFilter]);
-
+    }, [manufacturerFilter, countryFilter]);
+    
     
 
 
@@ -192,12 +172,12 @@ export default function SubscriptionHome() {
     return (
         <main className="flex p-5">
             {/* Brand filters */}
-            <div className='space-y-5'>
+            <div className='space-y-3'>
                 <div>
                     <p className='font-bold'>Filter by manufacturer</p>
                     <CheckboxGroup
                         // label="Filter by manufacturer"
-                        className="max-h-screen overflow-y-scroll overflow-x-hidden py-2 pr-2"
+                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
                         onValueChange={setManufacturerFilter}
                     >
                         {
@@ -210,7 +190,22 @@ export default function SubscriptionHome() {
                     </CheckboxGroup>
                 </div>
             
-
+                <div>
+                    <p className='font-bold'>Filter by Country</p>
+                    <CheckboxGroup
+                        // label="Filter by manufacturer"
+                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
+                        onValueChange={setCountryFilter}
+                    >
+                        {
+                            countries ? Array.from(countries.values()).map((m) => {
+                                return(
+                                    <Checkbox key={m.id} value={m.id.toString()}>{m.name}</Checkbox>
+                                );
+                            }) : null
+                        }
+                    </CheckboxGroup>
+                </div>
             </div>
 
             {/* cars */}
@@ -224,27 +219,38 @@ export default function SubscriptionHome() {
                     onChange={debouncedResults}
                 />
 
-                <Table aria-label="" selectionMode='multiple' color='primary'>
+                <Table aria-label="" selectionMode='multiple' color='primary'
+                    isHeaderSticky
+                      
+                      classNames={{
+                        base: "max-h-[600px] overflow-scroll",
+                        table: "min-h-[400px]",
+                      }}
+                      >
                 
                     <TableHeader columns={columns}>
                         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
                     </TableHeader>
 
-                    <TableBody emptyContent={"No cars to display"} onLoadMore={() => {console.log('LOAD MORE!')}}>
+                    <TableBody
+                        isLoading={isLoading}
+                        items={vehicles}
+                        loadingContent={<Spinner color="white" />}
+                    >
                         {
-                            vehicles?.map((value) => {
+                            (value: any) => {
                                 let m = manufacturer?.get(value.manufacturer);
                                 return (
                                     <TableRow key={value.id}>
                                         <TableCell>{value.id}</TableCell>
-                                        <TableCell>{value.shortname}</TableCell>
+                                        <TableCell>{value.name}</TableCell>
                                         <TableCell>{m?.name ?? ''}</TableCell>
                                         <TableCell>
-                                            <span className={`fi fi-${countries?.get(m!.country)?.code}`}></span>
+                                            <span className={`fi fi-${countries?.get(value.country)?.code}`}></span>
                                         </TableCell>
                                     </TableRow>
                                 );
-                            })
+                            }
                         }
                     </TableBody>
                 </Table>

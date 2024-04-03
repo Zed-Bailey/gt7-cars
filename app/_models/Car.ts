@@ -1,6 +1,7 @@
 
 export default interface Car {
     id: number;
-    shortname: string,
+    name: string,
     manufacturer: number;
+    country: number;
 }
