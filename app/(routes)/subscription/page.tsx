@@ -2,7 +2,7 @@
 
 import { Client, Databases, Query } from 'appwrite';
 import { useEffect, useMemo, useState } from 'react';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input, Spinner} from "@nextui-org/react";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Checkbox, CheckboxGroup, Input, Spinner, Button} from "@nextui-org/react";
 import {SearchIcon} from '../../_icons/SearchIcon';
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import debounce from "lodash.debounce";
@@ -195,6 +195,12 @@ export default function SubscriptionHome() {
 
     return (
         <main className="flex ps-5 pt-5 pr-5">
+            {/* <div className='w-full h-full relative z-20'> */}
+                <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'>
+                    Watch {selectedKeys.size} cars
+                </Button>
+            {/* </div> */}
+            
             {/* Brand filters */}
             <div className='gap-3'>
                 <div>
@@ -234,8 +240,6 @@ export default function SubscriptionHome() {
 
             {/* cars */}
             <div className='w-full h-screen flex flex-col gap-5'>
-                {selectedKeys ? <ul>{Array.from(selectedKeys.values()).map((x) => <li>{x}</li>)}</ul> : null}
-
                 <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
                 <Input variant='flat' placeholder='Search for cars' isClearable 
                     startContent={
