@@ -36,26 +36,9 @@ export default function Home() {
         
 
         <section className="w-full">
-          <h2 className="text-2xl">Create or update your subscription</h2>
-
-          <form className="w-full sm:max-w-96" onSubmit={submitSubscription}>
-            
-            <Input
-              required
-              variant="flat"
-              type="email"
-              label="Email"
-              placeholder="you@example.com"
-              startContent={
-                <MailIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
-            />
-
-            <Button type="submit" color="primary">
-              Submit
-            </Button>
-          </form>
-          
+          <h2>Login or Sign up</h2>
+          <Button color="primary" onClick={() => push('/auth/login')}>Login</Button>
+          <Button  variant="ghost" onClick={() => push('/auth/signup')}>Sign up</Button>
         </section>
         
       </main>

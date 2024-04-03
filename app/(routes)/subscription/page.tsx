@@ -43,7 +43,6 @@ export default function SubscriptionHome() {
 
 
     const [vehicles, setVehicles] = useState<Car[]>([]);
-    const [filteredVehicles, setFilteredVehicles] =  useState<Car[]>([]);
 
     const [supabase, setSupabaseClient] = useState<SupabaseClient>();
 
@@ -55,6 +54,7 @@ export default function SubscriptionHome() {
 
     const [searchQuery, setSearchQuery] = useState("");
 
+    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set<string>());
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -234,6 +234,8 @@ export default function SubscriptionHome() {
 
             {/* cars */}
             <div className='w-full h-screen flex flex-col gap-5'>
+                {selectedKeys ? <ul>{Array.from(selectedKeys.values()).map((x) => <li>{x}</li>)}</ul> : null}
+
                 <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
                 <Input variant='flat' placeholder='Search for cars' isClearable 
                     startContent={
@@ -245,8 +247,9 @@ export default function SubscriptionHome() {
 
                 <Table aria-label="" selectionMode='multiple' color='primary'
                     isHeaderSticky
-                      
-                    // className='min-h-[400px] flex-1 mb-5'
+                    selectedKeys={selectedKeys}
+                    onSelectionChange={setSelectedKeys}
+                    
                     classNames={{
                         base: "flex-1 overflow-scroll mb-10",
                         table: "min-h-[400px]",
