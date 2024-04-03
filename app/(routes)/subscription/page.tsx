@@ -194,9 +194,9 @@ export default function SubscriptionHome() {
 
 
     return (
-        <main className="flex p-5">
+        <main className="flex ps-5 pt-5 pr-5">
             {/* Brand filters */}
-            <div className='space-y-3'>
+            <div className='gap-3'>
                 <div>
                     <p className='font-bold'>Filter by manufacturer</p>
                     <CheckboxGroup
@@ -233,7 +233,7 @@ export default function SubscriptionHome() {
             </div>
 
             {/* cars */}
-            <div className='w-full space-y-5'>
+            <div className='w-full h-screen flex flex-col gap-5'>
                 <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
                 <Input variant='flat' placeholder='Search for cars' isClearable 
                     startContent={
@@ -246,11 +246,12 @@ export default function SubscriptionHome() {
                 <Table aria-label="" selectionMode='multiple' color='primary'
                     isHeaderSticky
                       
-                      classNames={{
-                        base: "max-h-[600px] overflow-scroll",
+                    // className='min-h-[400px] flex-1 mb-5'
+                    classNames={{
+                        base: "flex-1 overflow-scroll mb-10",
                         table: "min-h-[400px]",
                       }}
-                      >
+                >
                 
                     <TableHeader columns={columns}>
                         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
@@ -280,10 +281,6 @@ export default function SubscriptionHome() {
                 </Table>
             
             </div>
-
-            {
-
-            }
             
         </main>
     );
