@@ -191,12 +191,33 @@ export default function SubscriptionHome() {
     
 
 
+    async function saveUserVehicles() {
+        const uid = (await supabase!.auth.getSession()).data.session?.user.id;
+        
+        console.log(uid);
+        let keys = Array.from(selectedKeys.values());
+        let row = {
+            user_id: uid,
+            watched_cars: keys
+        };
 
+        const {data, error} = await supabase!.from('UserSubscriptions')
+            .upsert(row, {
+                onConflict: "user_id",
+                ignoreDuplicates: false
+            })
+            .select();
+
+        console.log(data);
+        console.log(error);
+
+    }
 
     return (
         <main className="flex ps-5 pt-5 pr-5">
             {/* <div className='w-full h-full relative z-20'> */}
-                <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'>
+                <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'
+                onClick={saveUserVehicles}>
                     Watch {selectedKeys.size} cars
                 </Button>
             {/* </div> */}
@@ -270,20 +291,16 @@ export default function SubscriptionHome() {
                         loadingContent={<Spinner color="white" />}
                     >
                         {
-                            (value: any) => {
-                                let m = manufacturer?.get(value.manufacturer);
-                                return (
-                                    <TableRow key={value.id}>
-                                        <TableCell>{value.id}</TableCell>
-                                        <TableCell>{value.name}</TableCell>
-                                        <TableCell>{m?.name ?? ''}</TableCell>
-                                        <TableCell>
-                                            <span className={`fi fi-${countries?.get(value.country)?.code}`}></span>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            }
-                        }
+                            (value: any) => (
+                                <TableRow key={value.id}>
+                                    <TableCell>{value.id}</TableCell>
+                                    <TableCell>{value.name}</TableCell>
+                                    <TableCell>{manufacturer?.get(value.manufacturer)?.name ?? ''}</TableCell>
+                                    <TableCell>
+                                        <span className={`fi fi-${countries?.get(value.country)?.code}`}></span>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
             
