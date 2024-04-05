@@ -75,6 +75,28 @@ export default function SubscriptionHome() {
         setCountries(countries);
         setManufacturers(makers);
         
+        const uid = (await supabase!.auth.getSession()).data.session?.user.id;
+        if(!uid) {
+            console.log("ERROR: no user id");
+            return;
+        }
+
+        var {data, error} = await supabase!
+            .from('UserSubscriptions')
+            .select()
+            .eq('user_id', uid);
+
+        if(error) {
+            console.log(error);
+        }
+
+        console.log("data", data);
+        
+        
+        let watchedCarIds: string[] = data![0].watched_cars;
+        setSelectedKeys(new Set(watchedCarIds));
+
+
         setIsLoading(false);
 
     }
