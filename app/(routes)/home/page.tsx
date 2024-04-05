@@ -26,7 +26,7 @@ export default function Home() {
 
 
     const [supabase, setSupabase] = useState<SupabaseClient>();
-
+    const [uid, setUid] = useState<string>();
     const [vehicles, setVehicles] = useState<SavedCar[] | null>([]);
     const [vehicleIds, setVehicleIds] = useState<string[]>([]);
 
@@ -54,16 +54,17 @@ export default function Home() {
         }
 
         async function get() {
-            const uid = (await client.auth.getSession()).data.session?.user.id;
-            if(!uid) {
+            let uuid = (await client.auth.getSession()).data.session?.user.id;
+            if(!uuid) {
                 console.log("ERROR: no user id");
                 return;
             }
+            setUid(uuid);
 
             var {data, error} = await client
                 .from('UserSubscriptions')
                 .select()
-                .eq('user_id', uid);
+                .eq('user_id', uuid);
 
             if(error) {
                 console.log(error);
@@ -85,19 +86,46 @@ export default function Home() {
 
 
     async function deleteVehicle(id: string) {
-        let removed = vehicleIds.filter((x) => x !== id);
-        console.log(removed);
+        let removed = vehicleIds.filter((x) => x != id);
+        console.log(removed, id);
+        let row = {
+            user_id: uid,
+            watched_cars: removed
+        };
+
+        const {data, error} = await supabase!.from('UserSubscriptions')
+            .upsert(row, {
+                onConflict: "user_id",
+                ignoreDuplicates: false
+            })
+            .select();
+
+
+        if(error) {
+            throw error;
+        }
+
+        console.log(data);
+
+        // the new set of ids
+        let carIds: number[] = data[0].watched_cars.map(Number);
+        // remove vehicles
+        let updated = vehicles!.filter((x) => carIds.includes(x.id));
+
+
+        setVehicles(updated);
+        setVehicleIds(carIds);
+        
+
     }
 
 
     return (
-        <div>
+        <div className="p-5">
             
-            <br/>
-            {JSON.stringify(vehicles)}
-
 
             <h1 className="text-2xl font-semibold">My vehicles</h1>
+            <hr className="mt-2 mb-4"/>
             <div className="flex flex-col gap-4">
                 {
                     vehicles ? vehicles.map((x) => {
