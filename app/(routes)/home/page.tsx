@@ -28,6 +28,7 @@ export default function Home() {
     const [supabase, setSupabase] = useState<SupabaseClient>();
 
     const [vehicles, setVehicles] = useState<SavedCar[] | null>([]);
+    const [vehicleIds, setVehicleIds] = useState<string[]>([]);
 
     useEffect(() => {
         const client = GetSupabaseClient();
@@ -56,6 +57,7 @@ export default function Home() {
             const uid = (await client.auth.getSession()).data.session?.user.id;
             if(!uid) {
                 console.log("ERROR: no user id");
+                return;
             }
 
             var {data, error} = await client
@@ -71,6 +73,8 @@ export default function Home() {
             
             
             let watchedCarIds: string[] = data![0].watched_cars;
+            setVehicleIds(watchedCarIds);
+
             let cars = await getCars(watchedCarIds);
             setVehicles(cars);
         }
@@ -80,19 +84,25 @@ export default function Home() {
     }, []);
 
 
+    async function deleteVehicle(id: string) {
+        let removed = vehicleIds.filter((x) => x !== id);
+        console.log(removed);
+    }
+
 
     return (
         <div>
-            Hello world
+            
             <br/>
             {JSON.stringify(vehicles)}
 
 
+            <h1 className="text-2xl font-semibold">My vehicles</h1>
             <div className="flex flex-col gap-4">
                 {
                     vehicles ? vehicles.map((x) => {
                         return (
-                            <div key={x.id} className="group flex w-full max-w-screen-sm items-center justify-between border border-gray-400 bg-gray-900 rounded-lg p-3">
+                            <div key={x.id} className="group flex w-full max-w-screen-sm items-center justify-between border border-gray-400 rounded-lg p-3">
 
                                 <div className="flex items-center gap-4">
                                     <div className="text-center min-w-20">
@@ -107,7 +117,7 @@ export default function Home() {
                                 
                                 
                                 <div className="">
-                                    <Button color="danger" variant="light" isIconOnly>
+                                    <Button color="danger" variant="light" isIconOnly onClick={() => deleteVehicle(x.id)}>
                                         <TrashIcon className="fill-red-600"/>
                                     </Button>
                                 </div>
