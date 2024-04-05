@@ -10,14 +10,14 @@ import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 
 interface SavedCar {
-    id: any;
+    id: string;
     name: any;
     Country: {
-        name: any;
-        code: any;
+        name: string;
+        code: string;
     };
     Manufacturer: {
-        name: any;
+        name: string;
     };
 }
 
@@ -48,9 +48,9 @@ export default function Home() {
                 console.log(error);
             }
 
-            console.log("car data", data);
+            let proper: any[] = data ?? [];
             
-            return data;
+            return proper;
         }
 
         async function get() {
@@ -110,11 +110,11 @@ export default function Home() {
         // the new set of ids
         let carIds: number[] = data[0].watched_cars.map(Number);
         // remove vehicles
-        let updated = vehicles!.filter((x) => carIds.includes(x.id));
+        let updated = vehicles!.filter((x) => carIds.includes(Number(x.id)));
 
 
         setVehicles(updated);
-        setVehicleIds(carIds);
+        setVehicleIds(carIds.map((x) => x.toString()));
         
 
     }

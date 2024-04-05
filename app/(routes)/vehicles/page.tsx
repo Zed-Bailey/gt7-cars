@@ -65,7 +65,8 @@ export default function SubscriptionHome() {
 
 
     async function loadData() {
-
+        if(!supabase) { return; }
+        
         let loader = new DataLoader(supabase);
         let cars = await loader.loadcars();
         let countries = await loader.loadcountries();
@@ -295,7 +296,7 @@ export default function SubscriptionHome() {
                 <Table aria-label="" selectionMode='multiple' color='primary'
                     isHeaderSticky
                     selectedKeys={selectedKeys}
-                    onSelectionChange={setSelectedKeys}
+                    onSelectionChange={(keys:any) => setSelectedKeys(keys) }
                     
                     classNames={{
                         base: "flex-1 overflow-scroll mb-10",
