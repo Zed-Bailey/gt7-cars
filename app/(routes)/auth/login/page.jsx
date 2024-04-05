@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import GetSupabaseClient from "@/app/_helpers/client";
 
-export default function Login({props}) { 
+export default function Login() { 
 
     const [error, setError] = useState(null);
     const {push} = useRouter();

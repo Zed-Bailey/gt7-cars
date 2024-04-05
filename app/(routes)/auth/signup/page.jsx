@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Singup({props}) {
+export default function Singup() {
 
     const [error, setError] = useState(null);
     const {push} = useRouter();
