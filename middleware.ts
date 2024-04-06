@@ -11,10 +11,12 @@ const protectedRoutes = [
 
 export default async function middleware(req: NextRequest) {
     
-    const auth = await IsAuthenticated();
-    
-    if (!auth && protectedRoutes.includes(req.nextUrl.pathname)) {
-      const absoluteURL = new URL("/auth/login", req.url);
-      return NextResponse.redirect(absoluteURL);
-    }
+    // const auth = await IsAuthenticated();
+    // console.log(auth);
+    // if (!auth && protectedRoutes.includes(req.nextUrl.pathname)) {
+    //   const absoluteURL = new URL("/auth/login", req.url);
+    //   return NextResponse.redirect(absoluteURL);
+    // }
+
+    // return NextResponse.next();
   }
