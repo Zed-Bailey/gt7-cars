@@ -1,3 +1,4 @@
+import GetSupabaseClient from "@/app/_helpers/client";
 
 
 export async function GET(request: Request) {
@@ -18,13 +19,34 @@ export async function GET(request: Request) {
 
     // these are all the newly added cars
     let newCars = [...newLegend, ...newUsed];
+    let carIds = newCars.map((x) => x.carid);
+    
+    
+    let client = GetSupabaseClient();
+    
+    const {data, error} =  await client
+        .from('UserSubscriptions')
+        .select();
+    
+    // filter users down to those who have at least one matching id
+    // ideally this would be done as part of the SQL query but i cant figure that out
+    let users = data?.filter((x) => x.watched_cars.some((j: string) => carIds.includes(j)));
+
+    
 
 
 
+    /*
+
+    let messages = [];// generated messages
+    let body = {
+        Messages: messages
+    }
+
+    */
 
 
-
-    return Response.json(newCars);
+    return Response.json({error: error, data: users});
 }
 
 
@@ -58,4 +80,24 @@ export interface Car {
   
 
   
- 
+
+function BuildEmail(userVehicles: Car[], email: string) {
+
+
+    return {
+        From: {
+            Email: "myemail@gmail.com",
+            Name: "GT7 DealerSHip Notification"
+        },
+        To: {
+            Email: email
+        },
+        Subject: "Your saved vehicles have been recently added to the dealership", // rename
+        HTMLPart: `
+        actual html email here, generate with mjml?
+        `
+    }
+}
+
+
+
