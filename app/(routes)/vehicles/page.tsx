@@ -58,7 +58,12 @@ export default function SubscriptionHome() {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    
+    const pageSize = 50;
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageLoading, setPageLoading] = useState(false);
+
+    const [dataloader, setDataLoader] = useState<DataLoader>();
+
     const debouncedResults = useMemo(() => {
         return debounce(updateSearchQuery,300);
     }, []);
@@ -68,7 +73,9 @@ export default function SubscriptionHome() {
         if(!supabase) { return; }
         
         let loader = new DataLoader(supabase);
-        let cars = await loader.loadcars();
+        setDataLoader(loader);
+
+        let cars = await loader.loadcars(currentPage, pageSize);
         let countries = await loader.loadcountries();
         let makers = await loader.loadmanufacturers();
 
@@ -184,8 +191,6 @@ export default function SubscriptionHome() {
                 conFilterConverted = Array.from(countries!.values()).map((x) => x.id);
             }
 
-
-
             const { data, error } = await supabase
                 .from('Car')
                 .select()
@@ -234,6 +239,20 @@ export default function SubscriptionHome() {
         console.log(data);
         console.log(error);
 
+    }
+
+    async function loadNextPage() {
+        setPageLoading(true);
+
+        if(dataloader) {
+            
+            let data = await dataloader.loadcars(currentPage + 1, pageSize);
+            setCurrentPage(currentPage + 1);
+            setVehicles(vehicles.concat(data));
+        }
+
+
+        setPageLoading(false);
     }
 
     return (
@@ -302,6 +321,14 @@ export default function SubscriptionHome() {
                         base: "flex-1 overflow-scroll mb-10",
                         table: "min-h-[400px]",
                       }}
+                      bottomContent={
+                        <div className='flex w-full justify-center'>
+                            <Button className='' onPress={loadNextPage}>
+                                {pageLoading && <Spinner color="white" size="sm" />}
+                                Load More
+                            </Button>
+                        </div>
+                      }
                 >
                 
                     <TableHeader columns={columns}>

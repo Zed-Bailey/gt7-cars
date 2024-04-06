@@ -13,11 +13,15 @@ export default class DataLoader {
     }
 
 
-    async loadcars() : Promise<Car[]> {
+    async loadcars(page: number, pageSize: number) : Promise<Car[]> {
 
         const {data, error} = await this._client
             .from('Car')
-            .select();
+            .select()
+            // have to subtract one as the range is inclusive, will return records 1-50 rather then 1-49
+            // returning 1-50 will cause duplicate elements,
+            // i.e on the second page record 50 from the previous page and 1 from the current page are the same
+            .range(page * pageSize, (page+1)*pageSize-1);
         
         if(error) throw error;
 
