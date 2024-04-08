@@ -16,8 +16,8 @@ export default function Home() {
 
 
   return (
-    <main className="flex flex-col  items-center bg-cover bg-fixed bg-center bg-no-repeat"
-      style={{ backgroundImage: `url("787b.jpg")` }} >
+    <main className="flex flex-col  items-center bg-cover bg-fixed bg-center bg-no-repeat bg-black"
+      style={{ backgroundImage: 'url("787b.jpg")' }} >
 
       {/* <img className="w-full h-80 object-cover bg-fixed" src="787b.jpg"/> */}
 
@@ -29,7 +29,7 @@ export default function Home() {
           {/* Legendary */}
           <section className="flex gap-10 mt-20">
 
-            <div className="w-96 h-64 bg-gray-400"></div>
+            <img className="w-96 h-64 object-cover" src="gt7-official-1.jpg"/>
 
             <div className="w-96">
               <h2 className="text-2xl mb-3">Legend Cars</h2>
@@ -51,7 +51,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="w-96 h-64 bg-gray-400"></div>
+            
+            <img className="w-96 h-64 object-cover" src="gt7-official-2.jpg"/>
           </section>
 
 

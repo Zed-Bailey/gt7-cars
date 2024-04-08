@@ -65,7 +65,7 @@ function NotLoggedIn() {
     return (
         <Navbar isBordered>
         <NavbarBrand>
-          <p className="font-bold text-inherit">ACME</p>
+          <p className="font-bold text-inherit">GT7 Cars</p>
         </NavbarBrand>
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
          
@@ -91,7 +91,7 @@ const LoggedIn = ({ logoutClicked }: {logoutClicked: () => void}) => {
     return(
         <Navbar isBordered>
             <NavbarBrand>
-                <p className="font-bold text-inherit">ACME</p>
+                <p className="font-bold text-inherit">GT7 Cars</p>
             </NavbarBrand>
 
             <NavbarContent className="hidden sm:flex gap-4" justify="center">
