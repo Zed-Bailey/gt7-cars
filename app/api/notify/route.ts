@@ -1,51 +1,5 @@
-import GetSupabaseClient from "@/app/_helpers/client";
-
-
-export async function GET(request: Request) {
-
-    let res = await fetch('https://ddm999.github.io/gt7info/data.json')
-        .then(r => r.json())
-        .catch(() => null);
-
-    if(res === null) {
-        return new Response(JSON.stringify({msg : "failed to fetch data"}), {status: 400});
-    }
-
-    let latest: Dealership = res;
-
-    // filter cars to fetch only the ones that are newly added
-    let newLegend = latest.legend.cars.filter((x) => !x.new);
-    let newUsed = latest.used.cars.filter((x) => x.new);
-
-    // these are all the newly added cars
-    let newCars = [...newLegend, ...newUsed];
-    let carIds = newCars.map((x) => x.carid);
-    
-    
-    let client = GetSupabaseClient();
-    
-    const {data, error} =  await client
-        .from('UserSubscriptions')
-        .select()
-        .overlaps('watched_cars', carIds);
-        
-
-
-
-    /*
-
-    let messages = [];// generated messages
-    let body = {
-        Messages: messages
-    }
-
-    */
-
-
-    return Response.json({error: error, data: data});
-}
-
-
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
+import {Client} from "node-mailjet";
 
 export interface Dealership {
     updatetimestamp: string
@@ -73,23 +27,141 @@ export interface Car {
     new: boolean
 }
 
-  
+
+export async function GET(request: Request) {
+
+    let res = await fetch('https://ddm999.github.io/gt7info/data.json')
+        .then(r => r.json())
+        .catch(() => null);
+
+    if(res === null) {
+        return new Response(JSON.stringify({msg : "failed to fetch data"}), {status: 400});
+    }
+
+    let latest: Dealership = res;
+
+    // filter cars to fetch only the ones that are newly added
+    let newLegend = latest.legend.cars.filter((x) => x.new);
+    let newUsed = latest.used.cars.filter((x) => x.new);
+
+    // these are all the newly added cars
+    let newCars = [...newLegend, ...newUsed];
+    
+    // have to stringify the id so the string is wrapped in "" rather then ''
+    // will not work if '' is used, i believe this is because '' is not valid json so the values
+    // are never sent in the db request
+    let carIds: string[] = newCars.map((x) => JSON.stringify(x.carid));
+    
+    // carIds = carIds.map((x) => JSON.stringify(x));
+    //   carIds = ["1689"]
+    if(carIds.length == 0) {
+        return Response.json({msg: "No new cars recently added"});
+    }
+    
+    console.log('new car ids', carIds);
+    
+    
+    // let newUsed: Car[] = [];
+    // let newLegend: Car[] = []
+    // have to use service key as we need the admin functionality to get users
+    let client = createClient(process.env.SUPABASE_URL ?? "", process.env.SUPABASE_SERVICE_KEY ?? "");
+    
+    const {data, error} =  await client
+        .from('UserSubscriptions')
+        .select()
+        .overlaps('watched_cars', carIds);
+        
+    
+    if(error) {
+        return Response.json(error, {status : 400});
+    }
+    console.log('users watching cars', data);
+
+    let allUsers = await getUsers(client);
+    if(allUsers === null) {
+        return Response.json({error : "Failed to get the users"}, {status: 400});
+    }
+
+    let emails: any[] = [];
+    data.forEach((user) => {
+        let userEmail = allUsers?.users.find((x) => x.id == user.user_id)?.email;
+        console.log('email: ', userEmail);
+        if(userEmail) {
+            let used = newUsed.filter((c) => user.watched_cars.includes(c.carid));
+            let legendary = newLegend.filter((c) => user.watched_cars.includes(c.carid));
+            let email = BuildEmail(legendary, used, userEmail);
+            emails.push(email);
+        }
+    });
+
+    if(emails.length == 0) {
+        return Response.json({"msg" : "No emails to send"});
+    }
+    // console.log(emails);
+
+
+    await sendEmails(emails);
+
+
+    return Response.json({users: allUsers});
+}
+
+
+async function sendEmails(emails: any[]) {
+    const mailjet = new Client({
+        apiKey: process.env.MAILJET_PUBLIC_KEY,
+        apiSecret: process.env.MAILJET_PRIVATE_KEY
+    });
+    
+    const request = mailjet
+        .post("send", {'version': 'v3.1'})
+        .request({
+            "Messages" : emails,
+            // "Sandbox" : true
+        });
+
+    request
+        .then((result) => {
+          console.log(result.body)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+}
+
+
+async function getUsers(client: SupabaseClient) {
+    const {data, error} = await client.auth.admin.listUsers({ 
+        page:1,
+        perPage: 1000
+    });
+    if(error) {
+        return null;
+    }
+
+    return data;
+}
+
+
+
 
   
 
-function BuildEmail(userVehicles: Car[], email: string) {
+  
+
+function BuildEmail(legendary: Car[], used: Car[], email: string) {
 
 
     return {
-        From: {
-            Email: "myemail@gmail.com",
-            Name: "GT7 DealerSHip Notification"
+        "From": {
+            "Email": "emailzed03@gmail.com",
+            "Name": "GT7 DealerShip Notification"
         },
-        To: {
-            Email: email
+        "To": {
+            "Email": email
         },
-        Subject: "Your saved vehicles have been recently added to the dealership", // rename
-        HTMLPart: EmailBody()
+        "Subject": "Your saved vehicles have been recently added to the dealership", // rename
+        "HTMLPart": EmailBody(legendary, used)
     }
 }
 
