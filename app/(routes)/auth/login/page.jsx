@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import GetSupabaseClient from "@/app/_helpers/client";
 
-export default function Login({props}) { 
+export default function Login() { 
 
     const [error, setError] = useState(null);
     const {push} = useRouter();
@@ -47,7 +47,7 @@ export default function Login({props}) {
                     {error ?? ""}
                 </span>
                 </p>
-                <p className="text-sm text-gray-300">Don't have an account? <a className="underline text-blue-500" href="/auth/signup">Sign up</a></p>
+                <p className="text-sm text-gray-300">Don&apos;t have an account? <a className="underline text-blue-500" href="/auth/signup">Sign up</a></p>
 
                 <Button type="submit" variant="flat" color="primary" className="w-full mt-5">Login</Button>
             </form>
