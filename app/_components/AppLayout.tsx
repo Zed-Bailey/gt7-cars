@@ -85,7 +85,7 @@ function NotLoggedIn() {
 }
 
 
-const LoggedIn = ({logoutClicked}) => {
+const LoggedIn = ({ logoutClicked }: {logoutClicked: () => void}) => {
     const currentPath = usePathname();
     
     return(
