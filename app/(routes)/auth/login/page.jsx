@@ -9,10 +9,14 @@ import GetSupabaseClient from "@/app/_helpers/client";
 export default function Login() { 
 
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
     const {push} = useRouter();
 
     async function submit(event) {
         event.preventDefault();
+        setLoading(true);
+        setError(null);
         let email = event.target.email.value;
         let pwd = event.target.password.value;
         console.log(email, pwd);
@@ -26,6 +30,7 @@ export default function Login() {
 
         if(error) {
             setError(error.message);
+            setLoading(false);
             return;
         }
 
@@ -49,7 +54,7 @@ export default function Login() {
                 </p>
                 <p className="text-sm text-gray-300">Don&apos;t have an account? <a className="underline text-blue-500" href="/auth/signup">Sign up</a></p>
 
-                <Button type="submit" variant="flat" color="primary" className="w-full mt-5">Login</Button>
+                <Button type="submit" variant="flat" color="primary" className="w-full mt-5" isLoading={loading}>Login</Button>
             </form>
         </main>
     );
