@@ -4,6 +4,7 @@ import { Button, Input } from "@nextui-org/react";
 import Image from "next/image";
 import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const { push } = useRouter();
@@ -29,7 +30,7 @@ export default function Home() {
           {/* Legendary */}
           <section className="flex gap-10 mt-20">
 
-            <img className="w-96 h-64 object-cover" src="gt7-official-1.jpg"/>
+            <img className="w-96 h-64 object-cover rounded-lg" src="gt7-official-1.jpg"/>
 
             <div className="w-96">
               <h2 className="text-2xl mb-3">Legend Cars</h2>
@@ -52,7 +53,7 @@ export default function Home() {
             </div>
 
             
-            <img className="w-96 h-64 object-cover" src="gt7-official-2.jpg"/>
+            <img className="w-96 h-64 object-cover rounded-lg" src="gt7-official-2.jpg"/>
           </section>
 
 
@@ -60,8 +61,8 @@ export default function Home() {
 
           <section className="flex flex-col w-96 text-center mt-20 gap-4">
             <h2 className="text-2xl">Get Started Now</h2>
-            <Button color="primary" onClick={() => push('/auth/login')}>Login</Button>
-            <Button variant="ghost" onClick={() => push('/auth/signup')}>Sign up</Button>
+            <Button as={Link} color="primary" href="/auth/login">Login</Button>
+            <Button variant="ghost" href="/auth/signup" as={Link}>Sign up</Button>
           </section>
 
         </div>
