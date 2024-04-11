@@ -15,7 +15,7 @@ export default function SavedCarRow({ car, deleteClicked }: { car: SavedCar, del
                 </div>
                 <div>
                     <h2 className="text-lg font-semibold">{car.name}</h2>
-                    <p className="text-sm">{car.Manufacturer.name}</p>
+                    <p className="text-sm font-light">{car.Manufacturer.name}</p>
                 </div>
             </div>
 
