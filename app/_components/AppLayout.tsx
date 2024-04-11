@@ -9,6 +9,8 @@ import { AuthenticatedUser, AuthenticatedUserContext } from "../_helpers/authCon
 import { useAuthenticatedUserContext } from "../_helpers/authContext";
 import { ToastContainer, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Cookies from "js-cookie";
+
 
 export default function AppLayout({
     children, // will be a page or nested layout
@@ -32,16 +34,20 @@ export default function AppLayout({
               if(session !== null) {
                 setIsLoggedIn(true);
                 setUserId(session.user.id);
+                Cookies.set('auth', 'true', {sameSite : "Strict"});
               }
             }
             else if (event === 'SIGNED_IN') {
               setIsLoggedIn(true);
               if(session) {
                 setUserId(session.user.id);
+                let l=Cookies.set('auth', 'true', {sameSite : "Strict"});
+                console.log('cookie: ', l)
               }
             } else if (event === 'SIGNED_OUT') {
               setIsLoggedIn(false);
               setUserId(null);
+              Cookies.remove("auth");
             }
             else if (event === 'PASSWORD_RECOVERY') {
               // handle password recovery event
@@ -58,13 +64,16 @@ export default function AppLayout({
           return () => data.subscription.unsubscribe()
     }, []);
 
-
+    const { push } = useRouter();
 
     return (
       <AuthenticatedUserContext.Provider value={{user_id, setUserId}}>
           <div>
               {
-                  isLoggedIn ? <LoggedIn logoutClicked={() => client?.auth.signOut()}/> : <NotLoggedIn/>
+                  isLoggedIn ? <LoggedIn logoutClicked={() => {
+                    client?.auth.signOut();
+                    push('/');
+                  }}/> : <NotLoggedIn/>
               }
               
               {children}
@@ -82,7 +91,7 @@ export default function AppLayout({
                 theme="dark"
                 transition={Bounce}
               />
-              
+
           </div>
       </AuthenticatedUserContext.Provider>
     );
