@@ -22,7 +22,8 @@
     "node-appwrite": "^12.0.1",
     "node-mailjet": "^6.0.5",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
