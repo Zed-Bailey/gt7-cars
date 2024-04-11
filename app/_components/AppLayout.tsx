@@ -5,7 +5,10 @@ import { ReactNode, useEffect, useState } from "react";
 import GetSupabaseClient from "../_helpers/client";
 import { Button, Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { usePathname, useRouter } from "next/navigation";
-
+import { AuthenticatedUser, AuthenticatedUserContext } from "../_helpers/authContext";
+import { useAuthenticatedUserContext } from "../_helpers/authContext";
+import { ToastContainer, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function AppLayout({
     children, // will be a page or nested layout
@@ -15,7 +18,8 @@ export default function AppLayout({
 
     const [client, setClient] = useState<SupabaseClient>();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    
+    const {user_id, setUserId} = useAuthenticatedUserContext();
+
     useEffect(() => {
         const c = GetSupabaseClient();
         setClient(c);
@@ -27,12 +31,17 @@ export default function AppLayout({
               // handle initial session
               if(session !== null) {
                 setIsLoggedIn(true);
+                setUserId(session.user.id);
               }
             }
             else if (event === 'SIGNED_IN') {
               setIsLoggedIn(true);
+              if(session) {
+                setUserId(session.user.id);
+              }
             } else if (event === 'SIGNED_OUT') {
               setIsLoggedIn(false);
+              setUserId(null);
             }
             else if (event === 'PASSWORD_RECOVERY') {
               // handle password recovery event
@@ -49,14 +58,33 @@ export default function AppLayout({
           return () => data.subscription.unsubscribe()
     }, []);
 
+
+
     return (
-        <div>
-            {
-                isLoggedIn ? <LoggedIn logoutClicked={() => client?.auth.signOut()}/> : <NotLoggedIn/>
-            }
-            
-            {children}
-        </div>
+      <AuthenticatedUserContext.Provider value={{user_id, setUserId}}>
+          <div>
+              {
+                  isLoggedIn ? <LoggedIn logoutClicked={() => client?.auth.signOut()}/> : <NotLoggedIn/>
+              }
+              
+              {children}
+
+              <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable
+                pauseOnHover={false}
+                theme="dark"
+                transition={Bounce}
+              />
+              
+          </div>
+      </AuthenticatedUserContext.Provider>
     );
 }
 
