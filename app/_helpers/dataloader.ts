@@ -18,6 +18,7 @@ export default class DataLoader {
         const {data, error} = await this._client
             .from('Car')
             .select()
+            .order('name')
             // have to subtract one as the range is inclusive, will return records 1-50 rather then 1-49
             // returning 1-50 will cause duplicate elements,
             // i.e on the second page record 50 from the previous page and 1 from the current page are the same
@@ -42,7 +43,8 @@ export default class DataLoader {
     async loadcountries() : Promise<Map<number, Country>> {
         const {data, error} = await this._client
             .from('Country')
-            .select();
+            .select()
+            .order('name');
         
         if(error) throw error;
 
@@ -59,8 +61,9 @@ export default class DataLoader {
 
     async loadmanufacturers() : Promise<Map<number, Manufacturer>> {
         const {data, error} = await this._client
-            .from('Manufacturer')
-            .select();
+            .from('Manufacturer')        
+            .select()
+            .order('name');
         
         if(error) throw error;
 
