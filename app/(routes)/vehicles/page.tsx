@@ -142,6 +142,7 @@ export default function SubscriptionHome() {
             const {data, error} = await supabase
                 .from('Car')
                 .select()
+                .order('name')
                 .ilike('name', `%${newValue}%`);
 
             if(error) throw error;
@@ -194,6 +195,7 @@ export default function SubscriptionHome() {
             const { data, error } = await supabase
                 .from('Car')
                 .select()
+                .order('name')
                 .in('manufacturer', manuFilterConverted)
                 .in('country', conFilterConverted);
 
@@ -256,7 +258,7 @@ export default function SubscriptionHome() {
     }
 
     return (
-        <main className="flex ps-5 pt-5 pr-5">
+        <main className="flex pl-5 pt-5 pr-5">
             {/* <div className='w-full h-full relative z-20'> */}
                 <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'
                 onClick={saveUserVehicles}>
@@ -318,7 +320,7 @@ export default function SubscriptionHome() {
                     onSelectionChange={(keys:any) => setSelectedKeys(keys) }
                     
                     classNames={{
-                        base: "flex-1 overflow-scroll mb-10",
+                        base: "flex-1 overflow-scroll mb-10 h-full",
                         table: "min-h-[400px]",
                       }}
                       bottomContent={
