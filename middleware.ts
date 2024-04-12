@@ -12,7 +12,6 @@ const protectedRoutes = [
 export default function middleware(req: NextRequest) {
 
     let isAuth = req.cookies.get("auth")?.value;
-    console.log(isAuth);
 
     if(isAuth == undefined && protectedRoutes.includes(req.nextUrl.pathname)) {
         const absoluteURL = new URL("/auth/login", req.url);

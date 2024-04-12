@@ -20,7 +20,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className + " min-h-screen dark"} style={{backgroundColor: "black"}}>
           <Providers>
-            
             <AppLayout>
               {children}
             </AppLayout>
