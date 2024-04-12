@@ -269,10 +269,13 @@ export default function SubscriptionHome() {
             {/* cars */}
             <div className='w-full h-screen flex flex-col gap-5'>
                 <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
-                <IconField iconPosition="left">
-                    <InputIcon className="pi pi-search"> </InputIcon>
-                    <InputText v-model="value1" placeholder="Search" />
-                </IconField>
+                <div className='w-full'>
+                    <IconField iconPosition="left" className='w-full'>
+                        <InputIcon className="pi pi-search"> </InputIcon>
+                        <InputText onChange={debouncedResults} placeholder="Search" />
+                    </IconField>
+                </div>
+                
 
 
                 {/* <Input variant='flat' placeholder='Search for cars' isClearable 

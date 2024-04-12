@@ -4,6 +4,10 @@ import "./globals.css";
 import { Providers } from "./providers";
 import AppLayout from "./_components/AppLayout";
 
+import "primeicons/primeicons.css"
+import "primereact/resources/themes/soho-light/theme.css";
+
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
