@@ -8,14 +8,14 @@ export default function VehicleTable({ cars, selectedCars, onSelectedChanged} : 
         <div className="w-full h-full">
             
             <DataTable value={cars} scrollable scrollHeight="400px" selectionMode={'multiple'} dataKey='id' 
-            virtualScrollerOptions={{ itemSize: 46 }} tableStyle={{ minWidth: '50rem' }}
+            virtualScrollerOptions={{ itemSize: 50 }} tableStyle={{ minWidth: '50rem' }}
             onSelectionChange={(e) => onSelectedChanged(e.value)} selection={selectedCars}
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
                 <Column field="id" header="Id" style={{ width: '20%' }}></Column>
+                <Column field="Manufacturer.name" header="Manufacturer" style={{ width: '20%' }}></Column>
                 <Column field="name" header="Name" style={{ width: '20%' }}></Column>
                 <Column field="Country.name" header="Country" style={{ width: '20%' }}></Column>
-                <Column field="Manufacturer.name" header="Manufacturer" style={{ width: '20%' }}></Column>
         
             </DataTable>
             

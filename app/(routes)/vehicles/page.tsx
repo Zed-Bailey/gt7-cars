@@ -14,29 +14,10 @@ import { useInfiniteScroll } from '@nextui-org/use-infinite-scroll';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import DataLoader from '@/app/_helpers/dataloader';
 import VehicleTable from '@/app/_components/VehicleTable';
-
-
-
-const columns = [
-    {
-        key: 'id',
-        label: 'Car ID'
-    },
-    {
-        key: 'shortname',
-        label: "Car Name"
-    },
-    {
-        key: 'maker',
-        label: 'Manufacturer'
-    }, 
-    {
-        key: 'country',
-        label: 'Country'
-    }
-]
-
-
+import CheckboxFilterGroup from '@/app/_components/CheckboxFilterGroup';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
+import { InputText } from "primereact/inputtext";
 
 
 
@@ -47,11 +28,11 @@ export default function SubscriptionHome() {
 
     const [supabase, setSupabaseClient] = useState<SupabaseClient>();
 
-    const [manufacturer, setManufacturers] = useState<Map<number, Manufacturer>>();
-    const [countries, setCountries] = useState<Map<number, Country>>();
+    const [manufacturer, setManufacturers] = useState<Manufacturer[]>([]);
+    const [countries, setCountries] = useState<Country[]>();
 
-    const [manufacturerFilter, setManufacturerFilter] = useState<string[]>([]);
-    const [countryFilter, setCountryFilter] = useState<string[]>([]);
+    const [manufacturerFilter, setManufacturerFilter] = useState<number[]>([]);
+    const [countryFilter, setCountryFilter] = useState<number[]>([]);
 
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -181,22 +162,24 @@ export default function SubscriptionHome() {
                 return;
             }
             
-
-            
-            let manuFilterConverted = manufacturerFilter.map(Number);
+            let manuFilterConverted = manufacturerFilter;
             if(manuFilterConverted.length == 0) {
-                manuFilterConverted = Array.from(manufacturer!.values()).map((x) => x.id);
+                manuFilterConverted = manufacturer.map((x) => x.id);
             }
 
 
-            let conFilterConverted: number[] = countryFilter.map(Number);
+            let conFilterConverted: number[] = countryFilter;
             if(conFilterConverted.length == 0) {
-                conFilterConverted = Array.from(countries!.values()).map((x) => x.id);
+                conFilterConverted = countries.map((x) => x.id);
             }
 
             const { data, error } = await supabase
                 .from('Car')
-                .select()
+                .select(`
+                    *, 
+                    Country(name, code),
+                    Manufacturer(name)
+                `)
                 .order('name')
                 .in('manufacturer', manuFilterConverted)
                 .in('country', conFilterConverted);
@@ -261,60 +244,44 @@ export default function SubscriptionHome() {
 
     return (
         <main className="flex pl-5 pt-5 pr-5">
-            {/* <div className='w-full h-full relative z-20'> */}
-                <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'
-                onClick={saveUserVehicles}>
+            
+            
+                {/* <Button size="lg" color="primary" variant='solid' className='absolute bottom-0 z-50 left-[50%] -translate-x-[50%]'
+                    onClick={saveUserVehicles}>
                     Watch {selectedCars?.length ?? 0} cars
-                </Button>
-            {/* </div> */}
+                </Button> */}
             
-            {/* Brand filters */}
-            <div className='gap-3'>
+            
+
+
+            <div className='flex flex-col gap-5'>
                 <div>
-                    <p className='font-bold'>Filter by manufacturer</p>
-                    <CheckboxGroup
-                        // label="Filter by manufacturer"
-                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
-                        onValueChange={setManufacturerFilter}
-                    >
-                        {
-                            manufacturer ? Array.from(manufacturer.values()).map((m) => {
-                                return(
-                                    <Checkbox key={m.id} value={m.id.toString()}>{m.name}</Checkbox>
-                                );
-                            }) : null
-                        }
-                    </CheckboxGroup>
+                    <p className='font-bold'>Filter Manufacturers</p>
+                    <CheckboxFilterGroup items={manufacturer} onFilterChanged={(values) => setManufacturerFilter(values)}/>
                 </div>
-            
                 <div>
-                    <p className='font-bold'>Filter by Country</p>
-                    <CheckboxGroup
-                        // label="Filter by manufacturer"
-                        className="max-h-96 overflow-y-scroll overflow-x-hidden py-2 pr-2"
-                        onValueChange={setCountryFilter}
-                    >
-                        {
-                            countries ? Array.from(countries.values()).map((m) => {
-                                return(
-                                    <Checkbox key={m.id} value={m.id.toString()}>{m.name}</Checkbox>
-                                );
-                            }) : null
-                        }
-                    </CheckboxGroup>
+                    <p className='font-bold'>Filter Countries</p>
+                    <CheckboxFilterGroup items={Array.from(countries?.values() ?? [])} onFilterChanged={(values) => setCountryFilter(values)}/>
                 </div>
             </div>
+            
 
             {/* cars */}
             <div className='w-full h-screen flex flex-col gap-5'>
                 <h1 className='text-3xl font-semibold'>Search for vehicles</h1>
-                <Input variant='flat' placeholder='Search for cars' isClearable 
+                <IconField iconPosition="left">
+                    <InputIcon className="pi pi-search"> </InputIcon>
+                    <InputText v-model="value1" placeholder="Search" />
+                </IconField>
+
+
+                {/* <Input variant='flat' placeholder='Search for cars' isClearable 
                     startContent={
                         <SearchIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0 fill-gray-300"/>
                     }
                     // value={searchQuery}
                     onChange={debouncedResults}
-                />
+                /> */}
 
 
 

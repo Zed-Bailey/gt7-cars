@@ -45,7 +45,7 @@ export default class DataLoader {
 
 
 
-    async loadcountries() : Promise<Map<number, Country>> {
+    async loadcountries() : Promise<Country[]> {
         const {data, error} = await this._client
             .from('Country')
             .select()
@@ -53,18 +53,18 @@ export default class DataLoader {
         
         if(error) throw error;
 
-        let countries: Map<number, Country> = new Map<number, Country>();
+        let countries: Country[] = [];
 
         data.forEach((x) => {
             let c: Country = x;
-            countries.set(c.id, c);
+            countries.push( c);
         });
 
         return countries;
     }
 
 
-    async loadmanufacturers() : Promise<Map<number, Manufacturer>> {
+    async loadmanufacturers() : Promise<Manufacturer[]> {
         const {data, error} = await this._client
             .from('Manufacturer')        
             .select()
@@ -72,11 +72,11 @@ export default class DataLoader {
         
         if(error) throw error;
 
-        let manufacturer: Map<number, Manufacturer> = new Map<number, Manufacturer>();
-
+        // let manufacturer: Map<number, Manufacturer> = new Map<number, Manufacturer>();
+        let manufacturer: Manufacturer[] = [];
         data.forEach((x) => {
             let c: Manufacturer = x;
-            manufacturer.set(c.id, c);
+            manufacturer.push(c);
         });
 
         return manufacturer;

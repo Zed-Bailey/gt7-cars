@@ -3,7 +3,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ReactNode, useEffect, useState } from "react";
 import GetSupabaseClient from "../_helpers/client";
-import { Button, Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { usePathname, useRouter } from "next/navigation";
 import { AuthenticatedUser, AuthenticatedUserContext } from "../_helpers/authContext";
 import { useAuthenticatedUserContext } from "../_helpers/authContext";
@@ -11,6 +10,10 @@ import { ToastContainer, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Cookies from "js-cookie";
 
+import { Menubar } from 'primereact/menubar';
+import { MenuItem } from 'primereact/menuitem';
+
+import {Button} from 'primereact/button';
 
 export default function AppLayout({
     children, // will be a page or nested layout
@@ -66,19 +69,56 @@ export default function AppLayout({
 
     const { push } = useRouter();
 
+
+    const loggedInMenuItems: MenuItem[] = [
+      {
+        label: "Garage",
+        icon: "pi pi-home",
+        url: "/home"
+      },
+      {
+        label: "All Vehicles",
+        icon: "pi pi-home",
+        url: "/vehicles"
+      }
+    ]
+
+    const end = (
+      isLoggedIn ? <div>
+        <Button label="Logout" outlined severity="success" 
+          onClick={() => {
+            client?.auth.signOut();
+            push('/');
+            }}
+        />
+
+      </div> 
+      : <div className="flex gap-2">
+        <a href="/auth/login" className="p-button font-bold text-white">
+            Login
+        </a>
+        <a href="/auth/signup" className="p-button font-bold text-white">
+            Sign Up
+        </a>
+      </div>
+    );
+
+
+    const start = (
+      <div>
+        <h1 className="font-semibold text-slate-700">GT-7 Car Notifier</h1>
+      </div>
+    );
+
     return (
       <AuthenticatedUserContext.Provider value={{user_id, setUserId}}>
           <div>
-              {
-                  isLoggedIn ? <LoggedIn logoutClicked={() => {
-                    client?.auth.signOut();
-                    push('/');
-                  }}/> : <NotLoggedIn/>
-              }
-              
-              {children}
 
-              <ToastContainer
+            <Menubar model={isLoggedIn ? loggedInMenuItems : []} end={end} start={start} className="sticky top-0 left-0 z-50"/> 
+
+            {children}
+
+            <ToastContainer
                 position="bottom-right"
                 autoClose={5000}
                 hideProgressBar={false}
@@ -94,67 +134,5 @@ export default function AppLayout({
 
           </div>
       </AuthenticatedUserContext.Provider>
-    );
-}
-
-
-function NotLoggedIn() {
-    return (
-        <Navbar isBordered>
-        <NavbarBrand>
-          <p className="font-bold text-inherit">GT7 Cars</p>
-        </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-         
-        </NavbarContent>
-        <NavbarContent justify="end">
-          <NavbarItem className="hidden lg:flex">
-            <Link href="/auth/login">Login</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Button as={Link} color="primary" href="/auth/signup" variant="flat">
-              Sign Up
-            </Button>
-          </NavbarItem>
-        </NavbarContent>
-      </Navbar>
-    );
-}
-
-
-const LoggedIn = ({ logoutClicked }: {logoutClicked: () => void}) => {
-    const currentPath = usePathname();
-    
-    return(
-        <Navbar isBordered>
-            <NavbarBrand>
-                <p className="font-bold text-inherit">GT7 Cars</p>
-            </NavbarBrand>
-
-            <NavbarContent className="hidden sm:flex gap-4" justify="center">
-
-                <NavbarItem isActive={currentPath ===  '/home'}>
-                    <Link href="/home" color={currentPath ===  '/home' ? "primary" : "foreground"}>
-                        My Vehicles
-                    </Link>
-                </NavbarItem>
-
-                <NavbarItem isActive={currentPath === '/vehicles'}>
-                    <Link href="/vehicles" color={currentPath ===  '/vehicles' ? "primary" : "foreground"} >
-                        All Vehicles
-                    </Link>
-                </NavbarItem>
-            
-            </NavbarContent>
-
-            <NavbarContent justify="end">
-                <NavbarItem>
-                    <Button color="primary" variant="flat" onClick={logoutClicked} >
-                    Logout
-                    </Button>
-                </NavbarItem>
-            </NavbarContent>
-
-        </Navbar>
     );
 }

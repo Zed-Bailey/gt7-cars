@@ -6,11 +6,14 @@ import SavedCar from "../_models/SavedCar";
 
 export default function SavedCarRow({ car, deleteClicked }: { car: SavedCar, deleteClicked: (id: string) => void }) {
     return (
+        
         <div className="group flex w-full max-w-screen-sm items-center justify-between border border-gray-400 rounded-lg p-3">
 
             <div className="flex items-center gap-4">
                 <div className="text-center min-w-20">
-                    <span className={`fi fi-${car.Country.code}`}></span>
+                    <div className="">
+                        <span className={`fi fi-${car.Country.code} outline-1 outline-black`}></span>
+                    </div>
                     <p className="group-hover:opacity-100 opacity-0 text-xs transition-opacity duration-150">{car.Country.name}</p>
                 </div>
                 <div>
