@@ -13,6 +13,7 @@ import { useAsyncList } from '@react-stately/data';
 import { useInfiniteScroll } from '@nextui-org/use-infinite-scroll';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import DataLoader from '@/app/_helpers/dataloader';
+import VehicleTable from '@/app/_components/VehicleTable';
 
 
 
@@ -54,8 +55,8 @@ export default function SubscriptionHome() {
 
     const [searchQuery, setSearchQuery] = useState("");
 
-    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set<string>());
-
+    const [selectedCars, setSelectedCars] = useState<Car[] | null>(null);
+    
     const [isLoading, setIsLoading] = useState(false);
 
     const pageSize = 50;
@@ -102,7 +103,8 @@ export default function SubscriptionHome() {
         
         
         let watchedCarIds: string[] = data![0].watched_cars;
-        setSelectedKeys(new Set(watchedCarIds));
+        let selected: Car[] = watchedCarIds.map((x) => { return {id: Number(x), name: "", Country: {name : "", code: ""}, Manufacturer: {name: ""}} });
+        setSelectedCars(selected);
 
 
         setIsLoading(false);
@@ -225,7 +227,7 @@ export default function SubscriptionHome() {
         const uid = (await supabase!.auth.getSession()).data.session?.user.id;
         
         console.log(uid);
-        let keys = Array.from(selectedKeys.values());
+        let keys = selectedCars?.filter((x) => x.id) ?? [];
         let row = {
             user_id: uid,
             watched_cars: keys
@@ -262,7 +264,7 @@ export default function SubscriptionHome() {
             {/* <div className='w-full h-full relative z-20'> */}
                 <Button size="lg" color="primary" variant='solid' className='absolute bottom-5 z-50 left-[50%] -translate-x-[50%]'
                 onClick={saveUserVehicles}>
-                    Watch {selectedKeys.size} cars
+                    Watch {selectedCars?.length ?? 0} cars
                 </Button>
             {/* </div> */}
             
@@ -314,7 +316,11 @@ export default function SubscriptionHome() {
                     onChange={debouncedResults}
                 />
 
-                <Table aria-label="" selectionMode='multiple' color='primary'
+
+
+                <VehicleTable cars={vehicles} selectedCars={selectedCars!} onSelectedChanged={setSelectedCars}/>
+
+                {/* <Table aria-label="" selectionMode='multiple' color='primary'
                     isHeaderSticky
                     selectedKeys={selectedKeys}
                     onSelectionChange={(keys:any) => setSelectedKeys(keys) }
@@ -354,7 +360,7 @@ export default function SubscriptionHome() {
                                 </TableRow>
                             )}
                     </TableBody>
-                </Table>
+                </Table> */}
             
             </div>
             
