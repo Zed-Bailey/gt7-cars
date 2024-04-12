@@ -17,7 +17,12 @@ export default class DataLoader {
 
         const {data, error} = await this._client
             .from('Car')
-            .select()
+            // .select()
+            .select(`
+                *, 
+                Country(name, code),
+                Manufacturer(name)
+            `)
             .order('name')
             // have to subtract one as the range is inclusive, will return records 1-50 rather then 1-49
             // returning 1-50 will cause duplicate elements,
