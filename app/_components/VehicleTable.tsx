@@ -5,10 +5,10 @@ import Car from '../_models/Car';
 export default function VehicleTable({ cars, selectedCars, onSelectedChanged} : {cars: Car[], selectedCars: Car[], onSelectedChanged: (value: Car[] | null) => void}){
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-[400px]">
             
             <DataTable value={cars} scrollable scrollHeight="400px" selectionMode={'multiple'} dataKey='id' 
-                virtualScrollerOptions={{ itemSize: 50 }} tableStyle={{ minWidth: '50rem', minHeight: '400px', height: '100%' }}
+                virtualScrollerOptions={{ itemSize: 50 }} tableStyle={{ minWidth: '50rem', minHeight: '400px' }}
                 onSelectionChange={(e) => onSelectedChanged(e.value)} selection={selectedCars}
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>

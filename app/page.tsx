@@ -22,7 +22,7 @@ export default function Home() {
 
       {/* <img className="w-full h-80 object-cover bg-fixed" src="787b.jpg"/> */}
 
-      <div className="mt-40 bg-black w-full">
+      <div className="mt-40 bg-gray-200 w-full">
         <h1 className="text-center font-bold text-3xl mt-10">Gran Turismo 7 Dealership Notifier</h1>
 
         <div className="flex flex-col w-full items-center">

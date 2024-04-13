@@ -1,10 +1,11 @@
-import { Button } from "@nextui-org/react";
+
+import { Button } from "primereact/button";
 import { TrashIcon } from "../_icons/TrashIcon";
 import Car from "../_models/Car";
-import SavedCar from "../_models/SavedCar";
 
 
-export default function SavedCarRow({ car, deleteClicked }: { car: SavedCar, deleteClicked: (id: string) => void }) {
+
+export default function SavedCarRow({ car, deleteClicked }: { car: Car, deleteClicked: (id: number) => void }) {
     return (
         
         <div className="group flex w-full max-w-screen-sm items-center justify-between border border-gray-400 rounded-lg p-3">
@@ -23,11 +24,8 @@ export default function SavedCarRow({ car, deleteClicked }: { car: SavedCar, del
             </div>
 
 
-            <div className="">
-                <Button color="danger" variant="light" isIconOnly onClick={() => deleteClicked(car.id)}>
-                    <TrashIcon className="fill-red-600" />
-                </Button>
-            </div>
+            <Button icon="pi pi-trash" severity="danger" outlined onClick={() => deleteClicked(car.id)}/>
+            
         </div>
     );
 }

@@ -12,7 +12,6 @@ import Cookies from "js-cookie";
 
 import { Menubar } from 'primereact/menubar';
 import { MenuItem } from 'primereact/menuitem';
-
 import {Button} from 'primereact/button';
 
 export default function AppLayout({
@@ -85,7 +84,7 @@ export default function AppLayout({
 
     const end = (
       isLoggedIn ? <div>
-        <Button label="Logout" outlined severity="success" 
+        <Button label="Logout" outlined 
           onClick={() => {
             client?.auth.signOut();
             push('/');
@@ -128,7 +127,6 @@ export default function AppLayout({
                 pauseOnFocusLoss={false}
                 draggable
                 pauseOnHover={false}
-                theme="dark"
                 transition={Bounce}
               />
 
