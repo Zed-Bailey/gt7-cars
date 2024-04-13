@@ -8,11 +8,16 @@ import { useRouter } from "next/navigation";
 export default function Singup() {
 
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
     const {push} = useRouter();
 
 
     async function submit(event) {
         event.preventDefault();
+        setLoading(true);
+        setError(null);
+
         let email = event.target.email.value;
         let pwd = event.target.password.value;
         let pwdConfirm = event.target.confirm.value;
@@ -34,6 +39,7 @@ export default function Singup() {
 
         if(error) {
             setError(error.message);
+            setLoading(false);
             return;
         }
 
@@ -60,7 +66,7 @@ export default function Singup() {
                 <p className="text-sm text-gray-300">Already have an account? <a className="underline text-blue-500" href="/auth/login">Login</a></p>
 
 
-                <Button type="submit" variant="flat" color="primary" className="w-full mt-5">Sign up</Button>
+                <Button type="submit" variant="flat" color="primary" className="w-full mt-5" isLoading={loading}>Sign up</Button>
             </form>
         </main>
     );

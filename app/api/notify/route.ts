@@ -154,8 +154,8 @@ function BuildEmail(legendary: Car[], used: Car[], email: string) {
 
     return {
         "From": {
-            "Email": "emailzed03@gmail.com",
-            "Name": "GT7 DealerShip Notification"
+            "Email": "granturismo.car.notification@gmail.com",
+            "Name": "GT7 Car Dealership Notification"
         },
         "To": {
             "Email": email

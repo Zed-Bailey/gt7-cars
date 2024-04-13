@@ -17,7 +17,13 @@ export default class DataLoader {
 
         const {data, error} = await this._client
             .from('Car')
-            .select()
+            // .select()
+            .select(`
+                *, 
+                Country(name, code),
+                Manufacturer(name)
+            `)
+            .order('name')
             // have to subtract one as the range is inclusive, will return records 1-50 rather then 1-49
             // returning 1-50 will cause duplicate elements,
             // i.e on the second page record 50 from the previous page and 1 from the current page are the same
@@ -39,36 +45,38 @@ export default class DataLoader {
 
 
 
-    async loadcountries() : Promise<Map<number, Country>> {
+    async loadcountries() : Promise<Country[]> {
         const {data, error} = await this._client
             .from('Country')
-            .select();
+            .select()
+            .order('name');
         
         if(error) throw error;
 
-        let countries: Map<number, Country> = new Map<number, Country>();
+        let countries: Country[] = [];
 
         data.forEach((x) => {
             let c: Country = x;
-            countries.set(c.id, c);
+            countries.push( c);
         });
 
         return countries;
     }
 
 
-    async loadmanufacturers() : Promise<Map<number, Manufacturer>> {
+    async loadmanufacturers() : Promise<Manufacturer[]> {
         const {data, error} = await this._client
-            .from('Manufacturer')
-            .select();
+            .from('Manufacturer')        
+            .select()
+            .order('name');
         
         if(error) throw error;
 
-        let manufacturer: Map<number, Manufacturer> = new Map<number, Manufacturer>();
-
+        // let manufacturer: Map<number, Manufacturer> = new Map<number, Manufacturer>();
+        let manufacturer: Manufacturer[] = [];
         data.forEach((x) => {
             let c: Manufacturer = x;
-            manufacturer.set(c.id, c);
+            manufacturer.push(c);
         });
 
         return manufacturer;

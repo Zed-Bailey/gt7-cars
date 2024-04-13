@@ -1,12 +1,14 @@
-// app/providers.tsx
 'use client'
 
-import {NextUIProvider} from '@nextui-org/react'
+import { PrimeReactProvider } from "primereact/api";
+import Tailwind from "primereact/passthrough/tailwind"
 
 export function Providers({children}: { children: React.ReactNode }) {
   return (
-    <NextUIProvider>
+    
+    <PrimeReactProvider value={{pt: Tailwind}}>
       {children}
-    </NextUIProvider>
+    </PrimeReactProvider>
+    
   )
 }

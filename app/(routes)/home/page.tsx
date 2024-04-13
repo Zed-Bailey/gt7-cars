@@ -2,24 +2,13 @@
 
 import GetSupabaseClient from "@/app/_helpers/client";
 import Car from "@/app/_models/Car";
-import { Button, select } from "@nextui-org/react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import {TrashIcon} from "../../_icons/TrashIcon";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
+import SavedCarRow from "@/app/_components/SavedCarRow";
+import { toast } from "react-toastify";
 
 
-interface SavedCar {
-    id: string;
-    name: any;
-    Country: {
-        name: string;
-        code: string;
-    };
-    Manufacturer: {
-        name: string;
-    };
-}
 
 
 export default function Home() {
@@ -27,7 +16,7 @@ export default function Home() {
 
     const [supabase, setSupabase] = useState<SupabaseClient>();
     const [uid, setUid] = useState<string>();
-    const [vehicles, setVehicles] = useState<SavedCar[] | null>([]);
+    const [vehicles, setVehicles] = useState<Car[] | null>([]);
     const [vehicleIds, setVehicleIds] = useState<string[]>([]);
 
     useEffect(() => {
@@ -102,7 +91,8 @@ export default function Home() {
 
 
         if(error) {
-            throw error;
+            toast.error('Failed to remove the vehicle');
+            return;
         }
 
         console.log(data);
@@ -116,43 +106,25 @@ export default function Home() {
         setVehicles(updated);
         setVehicleIds(carIds.map((x) => x.toString()));
         
+        toast.success("Removed Vehicle");
 
     }
 
 
     return (
-        <div className="p-5">
-            
+        <div className="flex justify-center">       
+            <div className="p-5 w-full max-w-6xl">
+                
 
-            <h1 className="text-2xl font-semibold">My vehicles</h1>
-            <hr className="mt-2 mb-4"/>
-            <div className="flex flex-col gap-4">
-                {
-                    vehicles ? vehicles.map((x) => {
-                        return (
-                            <div key={x.id} className="group flex w-full max-w-screen-sm items-center justify-between border border-gray-400 rounded-lg p-3">
-
-                                <div className="flex items-center gap-4">
-                                    <div className="text-center min-w-20">
-                                        <span className={`fi fi-${x.Country.code}`}></span>
-                                        <p className="group-hover:opacity-100 opacity-0 text-xs transition-opacity duration-150">{x.Country.name}</p>
-                                    </div>
-                                    <div>
-                                        <h2 className="text-lg font-semibold">{x.name}</h2>
-                                        <p className="text-sm">{x.Manufacturer.name}</p>
-                                    </div>
-                                </div>
-                                
-                                
-                                <div className="">
-                                    <Button color="danger" variant="light" isIconOnly onClick={() => deleteVehicle(x.id)}>
-                                        <TrashIcon className="fill-red-600"/>
-                                    </Button>
-                                </div>
-                            </div>
-                        );
-                    }) : null
-                }
+                <h1 className="text-2xl font-semibold">My Saved Vehicles</h1>
+                <hr className="mt-2 mb-4"/>
+                <div className="flex flex-col gap-4 items-center">
+                    {
+                        vehicles ? vehicles.map((x) => 
+                            <SavedCarRow key={x.id} car={x} deleteClicked={(id) => deleteVehicle(id.toString())}/>
+                        ) : null
+                    }
+                </div>
             </div>
         </div>
     );
