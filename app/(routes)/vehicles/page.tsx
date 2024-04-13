@@ -292,7 +292,7 @@ export default function SubscriptionHome() {
                         {
                             selectedCars?.map((x) => {
                                 return (
-                                    <SavedCarRow car={x} deleteClicked={(id) => { setSelectedCars(selectedCars.filter((x) => x.id !== id))}}/>
+                                    <SavedCarRow key={x.id} car={x} deleteClicked={(id) => { setSelectedCars(selectedCars.filter((x) => x.id !== id))}}/>
                                 );
                             })
                         }
