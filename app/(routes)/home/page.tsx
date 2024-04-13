@@ -2,14 +2,11 @@
 
 import GetSupabaseClient from "@/app/_helpers/client";
 import Car from "@/app/_models/Car";
-import { Button, select } from "@nextui-org/react";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import {TrashIcon} from "../../_icons/TrashIcon";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
-import SavedCar from "@/app/_models/SavedCar";
 import SavedCarRow from "@/app/_components/SavedCarRow";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 
 
@@ -19,7 +16,7 @@ export default function Home() {
 
     const [supabase, setSupabase] = useState<SupabaseClient>();
     const [uid, setUid] = useState<string>();
-    const [vehicles, setVehicles] = useState<SavedCar[] | null>([]);
+    const [vehicles, setVehicles] = useState<Car[] | null>([]);
     const [vehicleIds, setVehicleIds] = useState<string[]>([]);
 
     useEffect(() => {
@@ -124,7 +121,7 @@ export default function Home() {
                 <div className="flex flex-col gap-4 items-center">
                     {
                         vehicles ? vehicles.map((x) => 
-                            <SavedCarRow key={x.id} car={x} deleteClicked={(id) => deleteVehicle(id)}/>
+                            <SavedCarRow key={x.id} car={x} deleteClicked={(id) => deleteVehicle(id.toString())}/>
                         ) : null
                     }
                 </div>
